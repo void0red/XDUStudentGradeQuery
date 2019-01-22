@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
 )
 
 func newQuery(id string, username string, password string) *queryFormat {
@@ -27,6 +28,8 @@ func GetReady() string {
 
 func GetData(format *queryFormat) []*Course {
 	var courses []*Course
+	var lock sync.Mutex
+	var wg sync.WaitGroup
 	postData := query2byte(format)
 	req, _ := http.NewRequest("POST", getData, bytes.NewReader(postData))
 	req.Header.Set("Content-Type", "application/json")
@@ -41,14 +44,20 @@ func GetData(format *queryFormat) []*Course {
 	if res == "login_success" {
 		data, _ := all.Get("data").Get("rows").Array()
 		for _, v := range data {
+			wg.Add(1)
 			course := v.(map[string]interface{})
-			m := con2course(course)
-			courses = append(courses, m)
+			go func(i map[string]interface{}) {
+				m := con2course(course)
+				lock.Lock()
+				courses = append(courses, m)
+				lock.Unlock()
+				wg.Done()
+			}(course)
 		}
-
 	} else {
 		fmt.Println("error: ", res)
 		return nil
 	}
+	wg.Wait()
 	return courses
 }
