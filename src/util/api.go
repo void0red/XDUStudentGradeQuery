@@ -22,6 +22,7 @@ func Handle(course []*Course, key []string) *Courses {
 	m := NewCourses(course)
 	sumScore := 0.0
 	sumCredit := 0.0
+	sumCreditEx := 0.0
 	sumPoint := 0.0
 	valid := 0
 	for _, v := range course {
@@ -32,17 +33,21 @@ func Handle(course []*Course, key []string) *Courses {
 			sumCredit += credit
 			sumScore += score * credit
 		}
+		sumCreditEx += credit
 		sumPoint += v.point * credit
 	}
 	m.valid = valid
 	m.average = sumScore / sumCredit
-	m.gpa = sumPoint / sumCredit
+	m.gpa = sumPoint / sumCreditEx
 	return m
 }
 func (self *Courses) Info() {
+	cnt := 1
 	for _, v := range self.cre {
-		fmt.Println(*v)
+		fmt.Println(cnt, *v)
+		cnt += 1
 	}
+	fmt.Printf("valid: %d\n", self.valid)
 	fmt.Printf("average: %.3f\n", self.average)
 	fmt.Printf("gpa: %.3f\n", self.gpa)
 }
