@@ -28,7 +28,7 @@ func Handle(course []*Course, key []string) *Courses {
 	for _, v := range course {
 		credit, _ := strconv.ParseFloat(string(v.credit), 64)
 		score, _ := strconv.ParseFloat(string(v.score), 64)
-		if v.category == "001" && !isContain(v.name, key) {
+		if v.category == "001" || v.category == "必修" && !isContain(v.name, key) {
 			valid++
 			sumCredit += credit
 			sumScore += score * credit
